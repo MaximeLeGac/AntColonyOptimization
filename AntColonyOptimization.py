@@ -195,4 +195,58 @@ def parse_streets_data(streets_graph):
 
 
 
+'''
+# =============================================
+# Cree une nouvelle generation selon la selection Wheel
+# On selectionne les parents en repartissant les individus sur une roue a laquelle
+# chaque zone correspond a la note de chacun puis on prend un nombre random afin de
+# piocher les couples a reproduire
+# population : Liste des individus de la precedente generation
+def getNewGeneration(population):
+    sumScore = sum(int(person.split(referentiel.DEFAULT_SEPARATOR)[6]) for person in population)
+    newGeneration = []
+    while len(newGeneration) != referentiel.POPULATION_SIZE:
 
+        # Récupération du premier parent
+        maxRandom = int(sumScore * 1.5)
+        randScoreArea1 = random.randint(1, maxRandom) % sumScore
+        randScoreArea2 = random.randint(1, maxRandom) % sumScore
+        tmpScores = 0
+        parent1 = getParent(population, randScoreArea1)
+        parent2 = getParent(population, randScoreArea2)
+
+        # Dans le cas où les deux parents sont équivalents, on remplace de 2e parent
+        while parent1 == parent2:
+            randScoreArea2 = random.randint(1, maxRandom) % sumScore
+            parent2 = getParent(population, randScoreArea2)
+
+        # Croisement des parents selectionnes 
+        newGeneration += cross(parent1, parent2)
+    return newGeneration
+# =============================================
+
+# =============================================
+# Cree une nouvelle generation selon la selection Wheel
+# On selectionne les parents en repartissant les individus sur une roue a laquelle
+# chaque zone correspond a la note de chacun puis on prend un nombre random afin de
+# piocher les couples a reproduire
+# population : Liste des individus de la precedente generation
+# scoreArea  : Index de la zone de score ciblé pour la parent recherché
+def getParent(population, scoreArea):
+    parent = ""
+
+    # Récupération du premier parent
+    tmpScores = 0
+    for person in population:
+
+        # Parsing de l'individu
+        personScore = int(person.split(referentiel.DEFAULT_SEPARATOR)[6])
+
+        # Recuperation des parents s'ils correspondent aux randoms
+        if tmpScores <= scoreArea and scoreArea < tmpScores + personScore:
+            parent = person
+            break
+        tmpScores += personScore
+
+    return parent
+# ============================================='''
