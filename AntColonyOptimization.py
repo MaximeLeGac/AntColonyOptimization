@@ -183,7 +183,7 @@ def parse_streets_data(streets_graph):
                                                                 print("TENANT       = "+str(tenant))
                                                                 print("ABOUTISSANT  = "+str(aboutissant))
                                                                 print("POIDS        = "+str(poids))'''
-                streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(str(poids)), pheromon=0)
+                streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(str(poids)), pheromon=0, score=1)
 
     '''myedges = streets_graph.edges()
                 myedges.sort()
@@ -193,60 +193,24 @@ def parse_streets_data(streets_graph):
     #plt.show()
 
 
-
-
-'''
 # =============================================
-# Cree une nouvelle generation selon la selection Wheel
-# On selectionne les parents en repartissant les individus sur une roue a laquelle
-# chaque zone correspond a la note de chacun puis on prend un nombre random afin de
-# piocher les couples a reproduire
-# population : Liste des individus de la precedente generation
-def getNewGeneration(population):
-    sumScore = sum(int(person.split(referentiel.DEFAULT_SEPARATOR)[6]) for person in population)
-    newGeneration = []
-    while len(newGeneration) != referentiel.POPULATION_SIZE:
-
-        # Récupération du premier parent
-        maxRandom = int(sumScore * 1.5)
-        randScoreArea1 = random.randint(1, maxRandom) % sumScore
-        randScoreArea2 = random.randint(1, maxRandom) % sumScore
-        tmpScores = 0
-        parent1 = getParent(population, randScoreArea1)
-        parent2 = getParent(population, randScoreArea2)
-
-        # Dans le cas où les deux parents sont équivalents, on remplace de 2e parent
-        while parent1 == parent2:
-            randScoreArea2 = random.randint(1, maxRandom) % sumScore
-            parent2 = getParent(population, randScoreArea2)
-
-        # Croisement des parents selectionnes 
-        newGeneration += cross(parent1, parent2)
-    return newGeneration
+# Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
+# path : Chemain à évaluer
+    # 50% basé sur la longueur de la rue
+    # 50% basé sur le nombre de phéromone
+    street.score = (int(street.weight)*50) + (street.pheromon*50)
+    return street
 # =============================================
 
 # =============================================
-# Cree une nouvelle generation selon la selection Wheel
-# On selectionne les parents en repartissant les individus sur une roue a laquelle
-# chaque zone correspond a la note de chacun puis on prend un nombre random afin de
-# piocher les couples a reproduire
-# population : Liste des individus de la precedente generation
-# scoreArea  : Index de la zone de score ciblé pour la parent recherché
-def getParent(population, scoreArea):
-    parent = ""
-
-    # Récupération du premier parent
-    tmpScores = 0
-    for person in population:
-
-        # Parsing de l'individu
-        personScore = int(person.split(referentiel.DEFAULT_SEPARATOR)[6])
-
-        # Recuperation des parents s'ils correspondent aux randoms
-        if tmpScores <= scoreArea and scoreArea < tmpScores + personScore:
-            parent = person
-            break
-        tmpScores += personScore
-
-    return parent
-# ============================================='''
+# Renvoit la prochaine rue à emprunter (sélection par Wheel)
+# streets : Liste des rues empruntables à l'étape suivante
+    sumScore = sum(int(street.split('_')[6]) for street in streets)
+    scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
+    tmpScore = 0
+    for street in streets:
+        streetScore = int(street.split('_')[6])
+        if tmpScore <= scoreArea and scoreArea < tmpScore + streetScore:
+            return street
+        tmpScore += streetScore
+# =============================================
