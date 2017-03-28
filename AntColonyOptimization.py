@@ -199,7 +199,7 @@ def parse_streets_data(streets_graph):
 def evaluate(street):
     # 50% basé sur la longueur de la rue
     # 50% basé sur le nombre de phéromone
-    street.score = (int(street.weight)*50) + (street.pheromon*50)
+    street['score'] = (int(street['weight'])*50) + (street['pheromon']*50)
     return street
 # =============================================
 
@@ -207,11 +207,11 @@ def evaluate(street):
 # Renvoit la prochaine rue à emprunter (sélection par Wheel)
 # streets : Liste des rues empruntables à l'étape suivante
 def next(streets):
-    sumScore = sum(int(street.split('_')[6]) for street in streets)
+    sumScore = sum(int(street['score']) for street in streets)
     scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
     tmpScore = 0
     for street in streets:
-        streetScore = int(street.split('_')[6])
+        streetScore = int(street['score'])
         if tmpScore <= scoreArea and scoreArea < tmpScore + streetScore:
             return street
         tmpScore += streetScore
