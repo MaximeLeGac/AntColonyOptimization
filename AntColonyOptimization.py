@@ -38,25 +38,24 @@ def ant_launcher(streets_graph, starting_street, ending_street):
 
         #print("NEIGHBOR = "+str(streets_graph.neighbors(current_intersection)))
         # first the ant has to choose the next node to visit
-        neighbor_to_visit = choose_next_node(streets_graph, current_intersection, nodes_visited, best_way)
+        neighbor_to_visit, current_intersection = choose_next_node(streets_graph, current_intersection, nodes_visited, best_way)
 
-        print("current_intersection : "+current_intersection)
-        print("neighbor_to_visit : "+str(neighbor_to_visit))
-        print(streets_graph.edges(current_intersection, data='street'))
+        #print("current_intersection : "+current_intersection)
+        #print("neighbor_to_visit : "+str(neighbor_to_visit))
+        #print(streets_graph.edges(current_intersection, data='street'))
         #print("=========================================>"+streets_graph.edges(current_intersection, data='street')[neighbor_to_visit][1])
 
-        current_intersection, current_intersection = streets_graph.edges(current_intersection, data='street')[neighbor_to_visit][1]
+        #current_intersection = streets_graph.edges(current_intersection, data='street')[neighbor_to_visit][1]
         nodes_visited.append(current_intersection)
         best_way.append(current_intersection)
 
         print("GO TO : "+current_intersection)
         print("------------------------------------------------------------------------------------------------")
 
-        if len(nodes_visited) == 10:
+        if len(nodes_visited) == 5:
             current_intersection = ending_street
 
 
-    print("------------------------------------------------------------------------------------------------")
     print("ENDING AT : "+current_intersection)
     print("------------------------------------------------------------------------------------------------")
 
@@ -81,32 +80,30 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
 
     # Iteration on the neighbors to find the ones that haven't been visited
     for neighbor in streets_graph.neighbors_iter(current_intersection):
-        print("nodes_visited : "+str(nodes_visited))
+        #print("nodes_visited : "+str(nodes_visited))
         if neighbor not in nodes_visited:
             neighbors.append(neighbor)
+            current_intersection = neighbor
             #print(neighbor)
 
     # If the ant hasn't find any unvisited neighbor
-    if neighbors == []:
-        # The ant go backward until it finds a neighbor it hasn't visited
-        while neighbors == []:
-            for node in reversed(nodes_visited):
-                if neighbors == [] and node != current_intersection:
-                    print("REVERSE  GO : "+node)
-                    nodes_visited.append(node)
+    # The ant go backward until it finds a neighbor it hasn't visited
+    while neighbors == []:
+        best_way.remove(current_intersection)
+        current_intersection = best_way[len(best_way)-1]
+        print("BACKWARD TO : "+current_intersection)
+        nodes_visited.append(current_intersection)
 
-                    for neighbor in streets_graph.neighbors_iter(node):
-                        if neighbor not in nodes_visited:
-                            print("node = "+node)
-                            current_intersection = node
-                            print("neighbor : "+neighbor)
-                            neighbors.append(neighbor)
+        # Iteration on the neighbors to find the ones that haven't been visited
+        for neighbor in streets_graph.neighbors_iter(current_intersection):
+            #print("nodes_visited 2 : "+str(nodes_visited))
+            if neighbor not in nodes_visited:
+                neighbors.append(neighbor)
+                #print("Dat voisin : "+neighbor)
 
-                    if neighbors == []:
-                        best_way.remove(node)
-                        print("REMOVING : "+node)
 
     next_node = random.randint(0, (len(neighbors)-1))
+    current_intersection = neighbors[next_node]
 
     return next_node, current_intersection
 
