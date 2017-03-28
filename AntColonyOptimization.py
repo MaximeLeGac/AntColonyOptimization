@@ -10,11 +10,11 @@ def init():
 
     parse_streets_data(streets_graph)
 
-    starting_street = "SAUTRON Rue de la Futaie"
-    ending_street = "SAUTRON Rue de la Bretonnière"
+    '''starting_street = "SAUTRON Chemin de la Hubonnière"
+                ending_street = "Rue des Lauriers"'''
 
-    #starting_street = "SAUTRON Rue des Tisserands"
-    #ending_street = "SAUTRON Allée des Bleuets"
+    starting_street = "ORVAULT Chemin de la Grande Borne"
+    ending_street = "SAUTRON Rue du Doussais"
 
     ant_launcher(streets_graph, starting_street, ending_street)
 
@@ -52,14 +52,17 @@ def ant_launcher(streets_graph, starting_street, ending_street):
         print("GO TO : "+current_intersection)
         print("------------------------------------------------------------------------------------------------")
 
-        if len(nodes_visited) == 5:
-            current_intersection = ending_street
+        '''if len(nodes_visited) == 10:
+                                    current_intersection = ending_street'''
 
 
     print("ENDING AT : "+current_intersection)
     print("------------------------------------------------------------------------------------------------")
 
-    print(best_way)
+    print("BEST WAY = "+str(best_way)+"\n\n")
+
+    sum_weight = calculate_weight(streets_graph, best_way)
+    print("SUM WEIGHT = "+str(sum_weight))
 
 
 #################################################################################################################################
@@ -107,6 +110,23 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
 
     return next_node, current_intersection
 
+#################################################################################################################################
+# Used to calculate the sum of weights on a path
+def calculate_weight(streets_graph, tab_streets):
+    sum_weight = 0
+
+    first_node = tab_streets[0]
+
+    #for new_street in tab_streets:
+    for i in range(1, len(tab_streets)):
+        second_node = tab_streets[i]
+        print(first_node)
+        print(second_node)
+        print("weight : "+str(streets_graph[first_node][second_node]['weight']))
+        sum_weight += streets_graph[first_node][second_node]['weight']
+        first_node = second_node
+    
+    return sum_weight
 
 #################################################################################################################################
 # Used to parse the streets datas from the csv file to a graph
@@ -180,11 +200,7 @@ def parse_streets_data(streets_graph):
                                                                 print("TENANT       = "+str(tenant))
                                                                 print("ABOUTISSANT  = "+str(aboutissant))
                                                                 print("POIDS        = "+str(poids))'''
-                streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(str(poids)), pheromon=0, score=1)
-
-    '''myedges = streets_graph.edges()
-                myedges.sort()
-                print(myedges)'''
+                streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(poids), pheromon=0, score=1)
 
     #nx.draw(streets_graph)
     #plt.show()
