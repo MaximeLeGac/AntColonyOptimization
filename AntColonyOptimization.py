@@ -104,9 +104,13 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
                 neighbors.append(neighbor)
                 #print("Dat voisin : "+neighbor)
 
-
     next_node = random.randint(0, (len(neighbors)-1))
-    current_intersection = neighbors[next_node]
+    # 5% de chances de prendre le prochain noeud en random
+    if (random.randint(0, 100) < 5):
+        current_intersection = neighbors[next_node]
+    else:
+        # sinon on évalue les possibilités puis choix du prochain noeud par Wheel Selection
+        current_intersection = next(neighbors)
 
     return next_node, current_intersection
 
@@ -114,7 +118,6 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
 # Used to calculate the sum of weights on a path
 def calculate_weight(streets_graph, tab_streets):
     sum_weight = 0
-
     first_node = tab_streets[0]
 
     #for new_street in tab_streets:
@@ -157,7 +160,6 @@ def parse_streets_data(streets_graph):
             for i in range(len(row_split)):
                 tab.append(row_split[i].split(': ')[1].replace("'", ""))
 
-
             # and (tab[1] == "SAUTRON")
             if (tab != []) and (tab[1] == "SAUTRON"):
                 tab_graph.append(tab)
@@ -194,7 +196,6 @@ def parse_streets_data(streets_graph):
                 if poids == 0:
                     poids = 1
 
-
                 '''print("===========================================================")
                                                                 print("LIBELLE      = "+str(libelle))
                                                                 print("TENANT       = "+str(tenant))
@@ -208,18 +209,20 @@ def parse_streets_data(streets_graph):
 
 # =============================================
 # Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
-# path : Chemain à évaluer
-def evaluate(street):
-    # 50% basé sur la longueur de la rue
-    # 50% basé sur le nombre de phéromone
-    street['score'] = (int(street['weight'])*50) + (street['pheromon']*50)
-    return street
+# streets : Liste des rues à évaluer
+def evaluate(streets):
+    for street in streets:
+        # 50% basé sur la longueur de la rue
+        # 50% basé sur le nombre de phéromone
+        street['score'] = (int(street['weight'])*50) + (street['pheromon']*50)
+    return streets
 # =============================================
 
 # =============================================
 # Renvoit la prochaine rue à emprunter (sélection par Wheel)
 # streets : Liste des rues empruntables à l'étape suivante
 def next(streets):
+    evaluate(streets)
     sumScore = sum(int(street['score']) for street in streets)
     scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
     tmpScore = 0
