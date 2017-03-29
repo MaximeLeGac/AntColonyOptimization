@@ -110,7 +110,7 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
         current_intersection = neighbors[next_node]
     else:
         # sinon on évalue les possibilités puis choix du prochain noeud par Wheel Selection
-        current_intersection = next(neighbors)
+        current_intersection = next(streets_graph, current_intersection, neighbors)
 
     return next_node, current_intersection
 
@@ -210,20 +210,20 @@ def parse_streets_data(streets_graph):
 # =============================================
 # Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
 # streets : Liste des rues à évaluer
-def evaluate(streets):
-    for street in streets:
+def evaluate(streets_graph, current_intersection, streets):
+    #for street in streets:
         # 50% basé sur la longueur de la rue
         # 50% basé sur le nombre de phéromone
-        street['score'] = (int(street['weight'])*50) + (street['pheromon']*50)
+        #streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
     return streets
 # =============================================
 
 # =============================================
 # Renvoit la prochaine rue à emprunter (sélection par Wheel)
 # streets : Liste des rues empruntables à l'étape suivante
-def next(streets):
-    evaluate(streets)
-    sumScore = sum(int(street['score']) for street in streets)
+def next(streets_graph, current_intersection, streets):
+    evaluate(streets_graph, current_intersection, streets)
+    sumScore = sum(int(streets_graph[current_intersection][street]['score']) for street in streets)
     scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
     tmpScore = 0
     for street in streets:
