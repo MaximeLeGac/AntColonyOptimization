@@ -3,7 +3,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 
-NB_ANTS = 200
+NB_ANTS         = 20
+
+ALPHA           = 1         # Influence des phéromones (en noeuds)
+EVAPORATION     = 0.02
 
 #################################################################################################################################
 def init():
@@ -11,28 +14,43 @@ def init():
     best_way = []
     best_weight = 0
     path_found_by_ant = []
+    tab_weights = []
 
     parse_streets_data(streets_graph)
 
-    starting_street = "ORVAULT Chemin de la Grande Borne"
-    ending_street = "SAUTRON Rue du Doussais"
+    '''starting_street = "ORVAULT Chemin de la Grande Borne"
+                ending_street = "SAUTRON Rue du Doussais"'''
+    
+    starting_street = "NANTES Rue Jeannine"
+    ending_street = "NANTES Quai de Versailles"
 
     for i in range(NB_ANTS):
         path_found_by_ant = ant_launcher(streets_graph, starting_street, ending_street)
 
         sum_weight = calculate_weight(streets_graph, path_found_by_ant)
+        tab_weights.append(sum_weight)
 
         # if a shorter path has been found or it's the first path found
         if (sum_weight < best_weight) or (best_weight == 0):
-            print("BEST WEIGHT = "+str(best_weight))
-            print("SUM WEIGHT  = "+str(sum_weight))
-            print("PATH FOUND  = "+str(path_found_by_ant))
+            print("\n-------------------- ANT NUMBER "+str(i+1)+" --------------------")
+            print("PREVIOUS BEST WEIGHT     = "+str(best_weight))
+            print("NEW BEST WEIGHT          = "+str(sum_weight))
+            print("NEW PATH FOUND = "+str(path_found_by_ant))
             best_weight = sum_weight
             best_way = path_found_by_ant
 
     print("\n\nBest path found by the ants : "+str(best_way))
     print("Weight of the best path : "+str(best_weight))
 
+    show_graphic(tab_weights)
+
+def show_graphic(tab_weights):
+
+    plt.subplot(111)
+    plt.plot(tab_weights)
+    plt.title('Weights of paths found')
+
+    plt.show()
 
 
 #################################################################################################################################
@@ -65,6 +83,9 @@ def ant_launcher(streets_graph, starting_street, ending_street):
                 print("------------------------------------------------------------------------------------------------")
             
                 print("PATH FOUND = "+str(path_found))'''
+
+    # P=evaporation*Pheromones(i,j) + alpha * K
+    add_pheromon(streets_graph, path_found)
 
     return path_found
 
@@ -120,13 +141,53 @@ def calculate_weight(streets_graph, tab_streets):
     sum_weight = 0
     first_node = tab_streets[0]
 
-    #for new_street in tab_streets:
     for i in range(1, len(tab_streets)):
         second_node = tab_streets[i]
         sum_weight += streets_graph[first_node][second_node]['weight']
         first_node = second_node
     
     return sum_weight
+
+#################################################################################################################################
+# Used to put pheromons on the path of an ant
+def add_pheromon(streets_graph, path):
+    # P=evaporation*Pheromones(i,j) + alpha * K
+    first_node = path[0]
+    for i in range(1, len(path)):
+        second_node = path[i]
+        streets_graph[first_node][second_node]['pheromon'] = (EVAPORATION*streets_graph[first_node][second_node]['pheromon'])+(ALPHA*random.uniform(0,1))
+        first_node = second_node
+        #print("PHEROMON = "+str(streets_graph[first_node][second_node]['pheromon']))
+
+# =============================================
+# Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
+# streets : Liste des rues à évaluer
+def evaluate(streets_graph, current_intersection, streets):
+    for street in streets:
+        # 50% basé sur la longueur de la rue
+        # 50% basé sur le nombre de phéromone
+        streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
+    return streets
+# =============================================
+
+# =============================================
+# Renvoit la prochaine rue à emprunter (sélection par Wheel)
+# streets : Liste des rues empruntables à l'étape suivante
+def next(streets_graph, current_intersection, streets):
+    evaluate(streets_graph, current_intersection, streets)
+    sumScore = sum(int(streets_graph[current_intersection][street]['score']) for street in streets)
+    scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
+    tmpScore = 0
+    for street in streets:
+        streetScore = int(streets_graph[current_intersection][street]['score'])
+        if tmpScore <= scoreArea and scoreArea < tmpScore + streetScore:
+            return street
+        tmpScore += streetScore
+# =============================================
+
+
+
+
 
 #################################################################################################################################
 # Used to parse the streets datas from the csv file to a graph
@@ -153,7 +214,8 @@ def parse_streets_data(streets_graph):
             
             if index != 0:
 
-                if (row != []) and (row[4] == "SAUTRON"):
+                # and (row[4] == "NANTES")
+                if (row != []):
                     tenant = row[6]
                     aboutissant = row[7]
                     libelle = row[1]
@@ -197,29 +259,3 @@ def parse_streets_data(streets_graph):
     #nx.draw(streets_graph)
     #plt.show()
 
-
-# =============================================
-# Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
-# streets : Liste des rues à évaluer
-def evaluate(streets_graph, current_intersection, streets):
-    for street in streets:
-        # 50% basé sur la longueur de la rue
-        # 50% basé sur le nombre de phéromone
-        streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
-    return streets
-# =============================================
-
-# =============================================
-# Renvoit la prochaine rue à emprunter (sélection par Wheel)
-# streets : Liste des rues empruntables à l'étape suivante
-def next(streets_graph, current_intersection, streets):
-    evaluate(streets_graph, current_intersection, streets)
-    sumScore = sum(int(streets_graph[current_intersection][street]['score']) for street in streets)
-    scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
-    tmpScore = 0
-    for street in streets:
-        streetScore = int(streets_graph[current_intersection][street]['score'])
-        if tmpScore <= scoreArea and scoreArea < tmpScore + streetScore:
-            return street
-        tmpScore += streetScore
-# =============================================
