@@ -86,7 +86,7 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
         #print("nodes_visited : "+str(nodes_visited))
         if neighbor not in nodes_visited:
             neighbors.append(neighbor)
-            current_intersection = neighbor
+            #current_intersection = neighbor
             #print(neighbor)
 
     # If the ant hasn't find any unvisited neighbor
@@ -105,6 +105,7 @@ def choose_next_node(streets_graph, current_intersection, nodes_visited, best_wa
                 #print("Dat voisin : "+neighbor)
 
     next_node = random.randint(0, (len(neighbors)-1))
+
     # 5% de chances de prendre le prochain noeud en random
     if (random.randint(0, 100) < 5):
         current_intersection = neighbors[next_node]
@@ -211,10 +212,12 @@ def parse_streets_data(streets_graph):
 # Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
 # streets : Liste des rues à évaluer
 def evaluate(streets_graph, current_intersection, streets):
-    #for street in streets:
+    for street in streets:
         # 50% basé sur la longueur de la rue
         # 50% basé sur le nombre de phéromone
-        #streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
+        print("current_intersection = "+current_intersection)
+        print("street = "+street)
+        streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
     return streets
 # =============================================
 
@@ -227,7 +230,7 @@ def next(streets_graph, current_intersection, streets):
     scoreArea = random.randint(1, int(sumScore * 100)) % sumScore
     tmpScore = 0
     for street in streets:
-        streetScore = int(street['score'])
+        streetScore = int(streets_graph[current_intersection][street]['score'])
         if tmpScore <= scoreArea and scoreArea < tmpScore + streetScore:
             return street
         tmpScore += streetScore
