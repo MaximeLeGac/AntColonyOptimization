@@ -21,14 +21,16 @@ def init():
         path_found_by_ant = ant_launcher(streets_graph, starting_street, ending_street)
 
         sum_weight = calculate_weight(streets_graph, path_found_by_ant)
-        print("SUM WEIGHT = "+str(sum_weight))
 
         # if a shorter path has been found or it's the first path found
         if (sum_weight < best_weight) or (best_weight == 0):
+            print("BEST WEIGHT = "+str(best_weight))
+            print("SUM WEIGHT  = "+str(sum_weight))
+            print("PATH FOUND  = "+str(path_found_by_ant))
             best_weight = sum_weight
             best_way = path_found_by_ant
 
-    print("Best path found by the ants : "+str(best_way))
+    print("\n\nBest path found by the ants : "+str(best_way))
     print("Weight of the best path : "+str(best_weight))
 
 
@@ -60,9 +62,9 @@ def ant_launcher(streets_graph, starting_street, ending_street):
                                 print("------------------------------------------------------------------------------------------------")'''
 
     '''print("ENDING AT : "+current_intersection)
-                print("------------------------------------------------------------------------------------------------")'''
-
-    print("PATH FOUND = "+str(path_found)+"\n\n")
+                print("------------------------------------------------------------------------------------------------")
+            
+                print("PATH FOUND = "+str(path_found))'''
 
     return path_found
 
