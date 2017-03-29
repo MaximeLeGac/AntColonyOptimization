@@ -138,71 +138,65 @@ def parse_streets_data(streets_graph):
     tab_graph = []
     inc_impasse = 0
 
-    # 0 - BI_MIN
-    # 1 - COMMUNE
-    # 2 - STATUT
-    # 3 - LIBELLE
-    # 4 - BI_MAX
-    # 5 - BP_MIN
-    # 6 - MOT_DIRECTEUR
-    # 7 - BP_MAX
-    # 8 - TENANT
-    # 9 - ABOUTISSANT
-    # 10 - RIVOLI
-    # 11 - CATEGORIE
+    # 0 - CATEGORIE
+    # 1 - LIBELLE
+    # 2 - MOT_DIRECTEUR
+    # 3 - STATUT
+    # 4 - COMMUNE
+    # 5 - RIVOLI
+    # 6 - TENANT
+    # 7 - ABOUTISSANT
+    # 8 - BI_MIN
+    # 9 - BP_MIN
+    # 10 - BI_MAX
+    # 11 - BP_MAX
 
-    with open('VOIES_NM.csv') as csvfile:
+    with open('VOIES_NM.csv', 'r', newline='', encoding='utf8') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
-            row_split = str(row).split(',')
-            tab = []
-            poids = 0
+        for index, row in enumerate(csv.reader(csvfile)):
+            
+            if index != 0:
 
-            for i in range(len(row_split)):
-                tab.append(row_split[i].split(': ')[1].replace("'", ""))
+                if (row != []) and (row[4] == "SAUTRON"):
+                    tenant = row[6]
+                    aboutissant = row[7]
+                    libelle = row[1]
+                    bi_min = row[8]
+                    bi_max = row[10]
+                    bp_min = row[9]
+                    bp_max = row[11]
 
-            # and (tab[1] == "SAUTRON")
-            if (tab != []) and (tab[1] == "SAUTRON"):
-                tab_graph.append(tab)
-                tenant = tab[8]
-                aboutissant = tab[9]
-                libelle = tab[3]
-                bi_min = tab[0]
-                bi_max = tab[4]
-                bp_min = tab[5]
-                bp_max = tab[7]
+                    if tenant == "":
+                        tenant = str(inc_impasse)
+                        inc_impasse += 1
 
-                if tenant == "":
-                    tenant = str(inc_impasse)
-                    inc_impasse += 1
+                    if aboutissant == "":
+                        aboutissant = str(inc_impasse)
+                        inc_impasse += 1
 
-                if aboutissant == "":
-                    aboutissant = str(inc_impasse)
-                    inc_impasse += 1
+                    if tenant == 'Impasse':
+                        tenant = libelle
 
-                if tenant == 'Impasse':
-                    tenant = libelle
+                    if aboutissant == 'Impasse':
+                        aboutissant = libelle
 
-                if aboutissant == 'Impasse':
-                    aboutissant = libelle
+                    if tenant == aboutissant:
+                        tenant = libelle
 
-                if tenant == aboutissant:
-                    tenant = libelle
+                    if bi_min != "":
+                        poids = int(bi_max)-int(bi_min)
+                    elif bp_min != "":
+                        poids = int(bp_max)-int(bp_min)
 
-                if bi_min != "":
-                    poids = int(bi_max)-int(bi_min)
-                elif bp_min != "":
-                    poids = int(bp_max)-int(bp_min)
+                    if poids == 0:
+                        poids = 1
 
-                if poids == 0:
-                    poids = 1
-
-                '''print("===========================================================")
-                                                                print("LIBELLE      = "+str(libelle))
-                                                                print("TENANT       = "+str(tenant))
-                                                                print("ABOUTISSANT  = "+str(aboutissant))
-                                                                print("POIDS        = "+str(poids))'''
-                streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(poids), pheromon=0, score=1)
+                    '''print("===========================================================")
+                                                                    print("LIBELLE      = "+str(libelle))
+                                                                    print("TENANT       = "+str(tenant))
+                                                                    print("ABOUTISSANT  = "+str(aboutissant))
+                                                                    print("POIDS        = "+str(poids))'''
+                    streets_graph.add_edge(tenant, aboutissant, street=libelle, weight=(poids), pheromon=0, score=1)
 
     #nx.draw(streets_graph)
     #plt.show()
