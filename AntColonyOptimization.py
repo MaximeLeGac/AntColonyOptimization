@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import random
 
 NB_ANTS         = 20
-
 ALPHA           = 1         # Influence des phéromones (en noeuds)
 EVAPORATION     = 0.02
 
@@ -86,7 +85,6 @@ def ant_launcher(streets_graph, starting_street, ending_street):
 
     # P=evaporation*Pheromones(i,j) + alpha * K
     add_pheromon(streets_graph, path_found)
-
     return path_found
 
 
@@ -163,10 +161,11 @@ def add_pheromon(streets_graph, path):
 # Evalue un chemin en fonction de sa longueur et du nombre de phéromone présent sur celui-ci
 # streets : Liste des rues à évaluer
 def evaluate(streets_graph, current_intersection, streets):
+    maxWeight = max(int(streets_graph[current_intersection][street]['weight']) for street in streets) + 1
     for street in streets:
         # 50% basé sur la longueur de la rue
         # 50% basé sur le nombre de phéromone
-        streets_graph[current_intersection][street]['score'] = (streets_graph[current_intersection][street]['weight']*50)+(streets_graph[current_intersection][street]['pheromon']*50)
+        streets_graph[current_intersection][street]['score'] = (maxWeight - int(streets_graph[current_intersection][street]['weight']))*50 + (int(streets_graph[current_intersection][street]['pheromon']))*50
     return streets
 # =============================================
 
@@ -184,10 +183,6 @@ def next(streets_graph, current_intersection, streets):
             return street
         tmpScore += streetScore
 # =============================================
-
-
-
-
 
 #################################################################################################################################
 # Used to parse the streets datas from the csv file to a graph
@@ -258,4 +253,3 @@ def parse_streets_data(streets_graph):
 
     #nx.draw(streets_graph)
     #plt.show()
-
